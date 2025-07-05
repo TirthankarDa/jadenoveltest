@@ -22,6 +22,8 @@
     let chapters = $state([]);
     let currentBook = $state(null);
     let currentChapter = $state(null);
+    let intersectionObserver = null;
+    let isFetching = $state(false);
     
     // === EVENT HANDLERS ===
     function handleToggleSettings() {
@@ -108,9 +110,81 @@
         root.style.setProperty('--font-family', currentFontFamily === 'serif' ? 'Georgia, serif' : 'Helvetica, Arial, sans-serif');
     });
 
-    // === INFINITE SCROLL LOGIC (UNCHANGED) ===
-    // ...
-</script>
+    // === INFINITE SCROLL LOGIC ===
+
+    async function loadNextChapter(url) {
+        if (isFetching || !url) return;
+        isFetching = true;
+
+        const chaptersContainer = document.getElementById('chapters-container');
+        const loader = document.getElementById('infinite-scroll-loader');
+        if (loader) loader.hidden = false;
+
+        try {
+            const response = await fetch(url);
+            const doc = await response.text().then(html => new DOMParser().parseFromString(html, 'text/html'));
+            const newProse = doc.querySelector('.chapter-prose');
+
+            if (newProse && chaptersContainer) {
+                if (newProse.querySelector('.next-chapter-link')) {
+                    newProse.querySelector('.next-chapter-link').style.display = 'none';
+                }
+                const newWrapper = document.createElement('div');
+                newWrapper.className = 'chapter-wrapper';
+                newWrapper.appendChild(newProse);
+                chaptersContainer.appendChild(newWrapper);
+
+                history.pushState({}, '', url);
+                document.title = doc.title;
+                const newTitle = newProse.querySelector('.chapter-header h1').textContent;
+                localStorage.setItem('lastReadUrl', url);
+                localStorage.setItem('lastReadTitle', newTitle);
+
+                const newFooter = newProse.querySelector('.chapter-footer');
+                if (newFooter && newFooter.dataset.nextUrl) {
+                    intersectionObserver.observe(newFooter);
+                } else {
+                    intersectionObserver.disconnect();
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load next chapter:", error);
+        } finally {
+            isFetching = false;
+            if(loader) loader.hidden = true;
+        }
+    }
+
+    // Effect for managing the infinite scroll observer
+    $effect(() => {
+        const isActive = currentInfiniteScroll === 'on';
+        const chaptersContainer = document.getElementById('chapters-container');
+        
+        if (!chaptersContainer) return;
+
+        document.querySelectorAll('.next-chapter-link').forEach(link => {
+            link.style.display = isActive ? 'none' : 'inline-block';
+        });
+
+        if (isActive) {
+            if (intersectionObserver) intersectionObserver.disconnect();
+            intersectionObserver = new IntersectionObserver(entries => {
+                if (entries[0]?.isIntersecting) {
+                    intersectionObserver.unobserve(entries[0].target);
+                    loadNextChapter(entries[0].target.dataset.nextUrl);
+                }
+            }, { rootMargin: '400px' });
+
+            const lastFooter = chaptersContainer.querySelector('.chapter-footer:last-of-type');
+            if (lastFooter?.dataset.nextUrl) {
+                intersectionObserver.observe(lastFooter);
+            }
+        } else {
+            if (intersectionObserver) intersectionObserver.disconnect();
+        }
+    });
+
+    </script>
 
 <!-- The UI for the Settings Panel, now with Tailwind classes -->
 {#if isPanelOpen}
