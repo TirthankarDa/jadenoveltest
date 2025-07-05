@@ -1,0 +1,56 @@
+---
+// src/components/ChapterCard.astro
+
+// 1. REMOVE the incorrect import.
+// import type { Chapter } from '../data/books';
+
+// 2. DEFINE the shape of the `chapter` prop right here.
+// This interface describes the object that the card receives.
+export interface Chapter {
+  url: string;
+  title: string;
+  status: string;
+  wordCount: number;
+}
+
+// 3. The `Props` interface now uses the local `Chapter` type.
+// This part remains the same, but it now works.
+export interface Props {
+  chapter: Chapter;
+  chapterNumber: number;
+}
+
+const { chapter, chapterNumber } = Astro.props;
+---
+<a href={chapter.url} class="chapter-card">
+    <div class="chapter-card_number">
+      {String(chapterNumber).padStart(2, '0')}
+    </div>
+    <div class="chapter-card_content">
+        <h3>{chapter.title}</h3>
+        <div class="chapter-card_meta">
+            <span>{chapter.status}</span>
+            <span>{chapter.wordCount.toLocaleString()} words</span>
+        </div>
+    </div>
+</a>
+
+<style>
+/* Your styles remain unchanged */
+.chapter-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background-color: var(--background);
+    border: 1px solid var(--color-surface-secondary);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: background-color 0.2s, transform 0.2s;
+}
+.chapter-card:hover {
+    background-color: var(--color-surface-primary);
+    transform: translateY(-3px);
+}
+</style>

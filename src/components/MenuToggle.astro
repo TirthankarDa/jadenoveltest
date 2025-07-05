@@ -1,0 +1,61 @@
+<button class="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+</button>
+
+<script>
+  function setupMenuToggle() {
+    const button = document.querySelector('.menu-toggle');
+    if (button) {
+      button.addEventListener('click', () => {
+          const isExpanded = document.body.classList.toggle('nav-open');
+          button.setAttribute('aria-expanded', String(isExpanded));
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', setupMenuToggle);
+</script>
+
+<!--
+  This is component-scoped styling. These styles will ONLY apply
+  to the elements inside this MenuToggle.astro file.
+-->
+<style>
+    .menu-toggle {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .line {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-text-primary); /* Use the CSS variable from global.css */
+        border-radius: 1px;
+        transition: transform 0.05s ease-in-out, opacity 0.05s ease-in-out;
+        
+        /* Ensure lines are positioned correctly for the 'X' transform */
+        transform-origin: center;
+    }
+    :global(body.nav-open) .line:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+    
+    :global(body.nav-open) .line:nth-child(2) {
+        opacity: 0;
+    }
+
+    :global(body.nav-open) .line:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+</style>

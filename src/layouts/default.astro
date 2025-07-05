@@ -1,0 +1,64 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/header.astro';
+import '../components/global.css';
+
+// This is where we replace Jekyll's `site.*` variables
+const site = {
+    title: "My Modern Astro Site",
+    description: "A cool description of my new site."
+};
+
+export interface Props {
+    title?: string;
+    description?: string;
+}
+const { 
+    title = site.title, 
+    description = site.description 
+} = Astro.props;
+---
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{title === site.title ? site.title : `${title} - ${site.title}`}</title>
+    <meta name="description" content={description}>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://api.fontshare.com">
+
+    <!-- 
+      This script MUST be here and `is:inline` to prevent the flash of an
+      unstyled theme (FOUC). It runs before the page is rendered.
+    -->
+    <script is:inline>
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme') || 
+                       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>    
+    <!-- ClientRouter enables the page transitions -->
+    <ClientRouter />
+</head>
+<body>
+    <Header title={site.title} />
+    
+    <main>
+        <slot /> 
+    </main>
+
+    <footer>
+      <!-- You can add a footer component later if you want -->
+      <p>© {new Date().getFullYear()} {site.title}</p>
+    </footer>
+</body>
+</html>

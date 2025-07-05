@@ -1,0 +1,156 @@
+---
+// src/components/ReadingFooter.astro
+---
+
+<footer 
+  id="reading-footer" 
+  class="reading-footer"
+>
+  <div class="reading-footer-content">
+    <!-- Chapter list button -->
+    <button 
+      id="chapter-list-toggle" 
+      class="settings-button"
+      aria-label="Chapter list" 
+      title="Chapters"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+      </svg>
+    </button>
+
+    <!-- Spacer to push the settings button to the center -->
+    <div class="flex-1"></div>
+
+    <button 
+      id="bottom-settings-toggle" 
+      class="settings-button"
+      aria-label="Reading settings" 
+      title="Settings"
+    >
+      Aa
+    </button>
+    
+    <!-- Spacer to balance the layout -->
+    <div class="flex-1"></div>
+  </div>
+</footer>
+
+<!-- The JavaScript remains exactly the same. It is already perfect for this task. -->
+<script>
+  // Find our buttons
+  const settingsButton = document.getElementById('bottom-settings-toggle');
+  const chapterListButton = document.getElementById('chapter-list-toggle');
+
+  if (settingsButton) {
+    settingsButton.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('toggle-settings'));
+    });
+  }
+
+  if (chapterListButton) {
+    chapterListButton.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('toggle-chapter-list'));
+    });
+  }
+
+  // This script handles the auto-hiding behavior of the footer
+  let lastScrollY = window.scrollY;
+  let isTicking = false;
+
+  function handleFooterScroll() {
+    const footer = document.getElementById('reading-footer');
+    if (!footer) return;
+
+    if (window.scrollY > lastScrollY && window.scrollY > 100) {
+      // Scrolling down, hide the footer
+      footer.classList.add('hidden');
+    } else {
+      // Scrolling up, show the footer
+      footer.classList.remove('hidden');
+    }
+    lastScrollY = window.scrollY;
+    isTicking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!isTicking) {
+      window.requestAnimationFrame(handleFooterScroll);
+      isTicking = true;
+    }
+  }, { passive: true });
+</script>
+
+<!-- 
+  We keep this tiny style block for a specific reason:
+  The JavaScript adds a class named `hidden`. Tailwind's own `hidden` utility uses `display: none`, which
+  does not allow for CSS transitions. To make our slide-out animation work, we define our own
+  behavior for a class named `hidden` that is scoped only to this component.
+-->
+<style>
+  .reading-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    height: 60px;
+    
+    /* Use design system tokens */
+    background-color: var(--theme-bg, var(--color-surface-primary));
+    border-top: 1px solid var(--theme-border, var(--color-border-primary));
+    color: var(--theme-text, var(--color-text-primary));
+    
+    /* Transitions */
+    transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    
+    /* Ensure it's visible */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .reading-footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    padding: 0 1rem;
+  }
+
+  .reading-footer-content > div {
+    flex: 1;
+  }
+
+  .settings-button {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--theme-text, var(--color-text-primary));
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    /* Ensure button is visible */
+    position: relative;
+    z-index: 1;
+  }
+
+  .settings-button:hover {
+    background-color: var(--theme-border, var(--color-surface-tertiary));
+  }
+
+  .settings-button:focus {
+    outline: 2px solid var(--theme-link, var(--color-brand-accent));
+    outline-offset: 2px;
+  }
+
+  #reading-footer.hidden {
+    transform: translateY(100%);
+  }
+</style>

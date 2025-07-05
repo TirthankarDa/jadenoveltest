@@ -1,0 +1,35 @@
+---
+import { Image } from 'astro:assets';
+
+// This defines what data the component expects to receive.
+// We'll pass a 'book' object from our index page.
+export interface Props {
+  book: {
+    title: string;
+    slug: string;
+    coverImage: ImageMetadata; // For Astro's optimized Image component
+    description: string;
+    status?: string; // Optional status like "Currently Writing"
+  };
+}
+
+const { book } = Astro.props;
+---
+<a href={`/books/${book.slug}/`} class="book-card">
+    <Image 
+        src={book.coverImage} 
+        alt={`Cover for ${book.title}`} 
+        class="card__cover"
+        widths={[300, 600]}
+        sizes="(max-width: 767px) 100vw, 300px"
+        loading="eager"
+    />
+    <div class="card__content">
+        <h3>{book.title}</h3>
+        <p>{book.description}</p>
+        <!-- Only show the status if it exists -->
+        {book.status && (
+            <div class="card__meta">{book.status}</div>
+        )}
+    </div>
+</a>

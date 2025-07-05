@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/default.astro';
+import BookCard from '../components/BookCard.astro';
+import { Image } from 'astro:assets';
+
+// Import the content from your Markdown file
+import { Content as IntroContent } from '../content/home/intro.md';
+
+// Import the new stylesheet for this page
+import '../components/home.css';
+
+// Import your cover images
+import unfilteredCover from '../../public/unfiltered.jpeg';
+import statueImage from '../../public/statue.jpeg';
+
+// YOUR BOOK DATA - Now in a clean, easy-to-manage array!
+const books = [
+  {
+    title: 'Unfiltered',
+    slug: 'unfiltered', // for the URL, e.g., /books/unfiltered/
+    coverImage: unfilteredCover,
+    description: 'A raw, emotional journey where passion meets vulnerability.',
+    status: 'Currently Writing • Updates Every Saturday',
+  },
+  // To add a new book, just add a new object here!
+];
+---
+<Layout title="Ancient Jade Statue's Romance Library">
+
+    <!-- Hero Section -->
+    <section class="container hero">
+        <div id="continue-reading-widget" class="continue-reading" hidden>
+            <a id="continue-reading-link" href="#">
+                <span class="label">Continue Reading</span>
+                <span id="continue-reading-title" class="title"></span>
+            </a>
+        </div>
+        <div class="hero-content">
+            <Image 
+                src={statueImage} 
+                alt="Ancient Jade Statue" 
+                class="img-author"
+                width="120"
+                height="120"
+				loading="eager"
+            />
+            <h1 class="title title--hero">Ancient Jade Statue's Romance Library</h1>
+            <div class="subtitle subtitle--hero">
+                <IntroContent />
+            </div>
+        </div>
+    </section>
+
+    <!-- Books Section -->
+    <section class="container section">
+        <h2 class="title title--section">My Romance Collection</h2>
+        <div class="container-grid grid--books">
+            <!-- Loop over the books array to create the cards -->
+            {books.map(book => (
+                <BookCard book={book} />
+            ))}
+
+            <!-- The "Coming Soon" card -->
+            <div class="coming-soon">
+                <h3>More Stories Coming Soon...</h3>
+                <p class="coming-soon__text">Stay tuned for new tales of love, loss, and everything in between.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lastReadUrl = localStorage.getItem('lastReadUrl');
+        const lastReadTitle = localStorage.getItem('lastReadTitle');
+        
+        if (lastReadUrl && lastReadTitle) {
+            const widget = document.getElementById('continue-reading-widget');
+            const link = document.getElementById('continue-reading-link');
+            const titleEl = document.getElementById('continue-reading-title');
+            
+            if (link) {
+                (link as HTMLAnchorElement).href = lastReadUrl;
+            }
+            if (titleEl) {
+                titleEl.textContent = `"${lastReadTitle}"`;
+            }
+            if (widget) {
+                widget.hidden = false;
+            }
+        }
+    });
+    </script>
+
+</Layout>

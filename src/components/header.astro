@@ -1,0 +1,48 @@
+---
+// Import the interactive components we will create next
+import ThemeToggle from './ThemeToggle.astro';
+import MenuToggle from './MenuToggle.astro';
+
+// This is where we replace Jekyll/Liquid data.
+// In Astro, you just use JavaScript/TypeScript.
+const navigationLinks = [
+  { title: 'Home', url: '/' },
+  { title: 'About', url: '/about' },
+  { title: 'Blog', url: '/blog' }
+];
+
+// This lets us pass the site title from the layout
+export interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+
+// Get the current page URL to set the 'active' class
+const currentPath = Astro.url.pathname;
+---
+<header class="site-header">
+    <a class="site-title" href="/">{title}</a>
+
+    <div class="header-actions">
+        <div class="nav-overlay"></div>
+        
+        <nav class="site-nav">
+            <ul>
+                {navigationLinks.map(item => (
+                    <li>
+                        <a 
+                          href={item.url} 
+                          class={currentPath === item.url ? 'active' : ''}
+                        >
+                            {item.title}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+        
+        <!-- We replace the static buttons with our new interactive components -->
+        <ThemeToggle />
+        <MenuToggle />
+    </div>
+</header>

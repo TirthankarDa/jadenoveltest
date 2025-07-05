@@ -1,0 +1,121 @@
+---
+// src/pages/books/[slug].astro
+
+import Layout from '../../layouts/default.astro';
+// I'm assuming your books.js file is in `src/data/books.js` or similar
+// If it's not, you might need to adjust this path. Please provide that file if this fix causes a new error.
+import { books } from '../../data/books.js'; 
+import ChapterCard from '../../components/ChapterCard.astro';
+import { Image } from 'astro:assets';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  // This part is correct and doesn't need to change
+  return books.map(book => ({
+    params: { slug: book.slug },
+    props: { book },
+  }));
+}
+
+interface ChapterFrontmatter {
+  title: string;
+  chapterNumber: number;
+  status: string;
+  wordCount: number;
+}
+
+const { book } = Astro.props;
+
+// --- FIX IS HERE ---
+
+// CHANGE 1: Make the glob pattern static by using a wildcard (*) instead of a variable.
+// This will import ALL chapters from ALL books.
+const allChapterImports = await Astro.glob<ChapterFrontmatter>('../../content/*/chapter-*.md');
+
+// CHANGE 2: Filter the big list down to only the chapters for THIS book.
+// We check if the file path includes the current book's slug.
+const chapterImports = allChapterImports.filter(chapter => 
+  chapter.file.includes(`/${book.slug}/`)
+);
+
+// The rest of your logic from here should now work correctly!
+const chapters = chapterImports
+  .map(chapterImport => {
+    const slug = path.basename(chapterImport.file, '.md');
+    
+    const chapterDataForCard = {
+      url: `/books/${book.slug}/${slug}`,
+      title: chapterImport.frontmatter.title,
+      status: chapterImport.frontmatter.status,
+      wordCount: chapterImport.frontmatter.wordCount,
+    };
+    
+    return {
+      chapter: chapterDataForCard,
+      chapterNumber: chapterImport.frontmatter.chapterNumber,
+    };
+  })
+  .sort((a, b) => a.chapterNumber - b.chapterNumber);
+
+// This dynamic import is fine because it's not a glob.
+// It will be resolved correctly for each page.
+// However, I suspect your book data is missing some fields used below (like subtitle, tags). We can fix that next.
+const { Content: AboutContent } = await import(`../../content/${book.slug}/about.md`);
+const { Content: NoteContent } = await import(`../../content/${book.slug}/author-note.md`);
+---
+<Layout title={`${book.title} - A Raw Love Story`}>
+
+  <section class="book-hero">
+    <div class="grid grid--hero">
+        <Image 
+          src={book.coverImage} 
+          alt={`Cover for ${book.title}`} 
+          class="img-cover" 
+          width={300} 
+          height={500} 
+          loading="eager"
+          fetchpriority="high"
+        />
+      <div class="book-details">
+        <h1 class="title title--book-hero">{book.title}</h1>
+        <!-- This might cause an error if `subtitle` doesn't exist on your book object. -->
+        <p class="subtitle subtitle--book">{book.subtitle}</p> 
+        <div class="book-meta">
+          <div class="badge badge--status badge--status-large">{book.status}</div>
+          <div class="book-stats">
+            <!-- This will definitely cause an error because `tags` does not exist on your book object. -->
+            {book.tags && book.tags.map(tag => <span class="badge--stat">{tag}</span>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-heading">About This Story</h2>
+    <div class="prose-block">
+      <AboutContent />
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="title title--section">Chapters</h2>
+    <div class="grid grid--chapters">
+      {chapters.map(({ chapter, chapterNumber }) => (
+        <ChapterCard 
+          chapter={chapter} 
+          chapterNumber={chapterNumber}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="prose-section">
+    <div class="author-note">
+      <h3>Author's Note</h3>
+      <div class="prose-content">
+        <NoteContent />
+      </div>
+    </div>
+  </section>
+</Layout>

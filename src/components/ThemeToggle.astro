@@ -1,0 +1,87 @@
+---
+// This component has no server-side logic, so the frontmatter is empty.
+---
+<button class="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light theme">
+    <svg class="theme-toggle__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g class="sun-icon">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5" fill="currentColor"/>
+            <path d="M12 2V4M12 20V22M4 12H2M6.31412 6.31412L4.8999 4.8999M17.6859 6.31412L19.1001 4.8999M6.31412 17.69L4.8999 19.1042M17.6859 17.69L19.1001 19.1042M22 12H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+        <g class="moon-icon">
+            <path d="M21.0672 11.8568L20.4253 11.469L21.0672 11.8568ZM12.1432 2.93276L11.7553 2.29085V2.29085L12.1432 2.93276ZM21.25 12C21.25 17.1086 17.1086 21.25 12 21.25V22.75C17.9371 22.75 22.75 17.9371 22.75 12H21.25ZM12 21.25C6.89137 21.25 2.75 17.1086 2.75 12H1.25C1.25 17.9371 6.06294 22.75 12 22.75V21.25ZM2.75 12C2.75 6.89137 6.89137 2.75 12 2.75V1.25C6.06294 1.25 1.25 6.06294 1.25 12H2.75ZM15.5 14.25C12.3244 14.25 9.75 11.6756 9.75 8.5H8.25C8.25 12.5041 11.4959 15.75 15.5 15.75V14.25ZM20.4253 11.469C19.4172 13.1373 17.5882 14.25 15.5 14.25V15.75C18.1349 15.75 20.4407 14.3439 21.7092 12.2447L20.4253 11.469ZM9.75 8.5C9.75 6.41182 10.8627 4.5828 12.531 3.57467L11.7553 2.29085C9.65609 3.5593 8.25 5.86509 8.25 8.5H9.75ZM12 2.75C11.9115 2.75 11.8077 2.71008 11.7324 2.67527C11.6686 2.64743 11.6538 2.63324 11.6503 2.63135C11.6461 2.62906 11.6482 2.63048 11.6784 2.64343C11.7071 2.65581 11.7815 2.68676 11.7553 2.29085L12.531 3.57467C13.0342 3.27065 13.196 2.75 12 2.75V2.75Z" fill="currentColor"/>
+        </g>
+    </svg>
+</button>
+
+<script>
+  function setupThemeToggle() {
+    // --- START OF NEW CODE ---
+    // STEP 1: Always re-apply the theme on page load/navigation.
+    // This ensures the <html> tag has the correct `data-theme` attribute.
+    const theme = localStorage.getItem('theme') || 
+                   (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    // --- END OF NEW CODE ---
+
+
+    // STEP 2: Attach the click listener to the button.
+    // (This part is the same as before).
+    const button = document.querySelector('.theme-toggle');
+    if (button) {
+      button.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+  }
+
+  // This event listener now calls our updated function on every navigation.
+  document.addEventListener('astro:page-load', setupThemeToggle);
+</script>
+
+<style>
+    .theme-toggle {
+        /* Basic button reset */
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        
+        /* Improve focus outline for accessibility */
+        border-radius: 50%;
+        outline-offset: 4px;
+    }
+
+    .theme-toggle__icon {
+        /* Prevents weird clipping during rotation */
+        overflow: visible; 
+    }
+
+    .sun-icon, .moon-icon {
+        /* This is the key: define the animated properties */
+        transition: transform 0.4s ease-in-out, opacity 0.3s ease-in-out;
+        transform-origin: center center; /* Rotate from the middle */
+    }
+
+    /* Styles for LIGHT mode */
+    :global([data-theme="light"]) .moon-icon {
+        transform: scale(0.6) rotate(-45deg);
+        opacity: 0;
+    }
+    :global([data-theme="light"]) .sun-icon {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    /* Styles for DARK mode */
+    :global([data-theme="dark"]) .sun-icon {
+        transform: scale(0.6) rotate(45deg);
+        opacity: 0;
+    }
+    :global([data-theme="dark"]) .moon-icon {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+</style>

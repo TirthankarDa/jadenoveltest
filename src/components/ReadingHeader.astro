@@ -1,0 +1,119 @@
+
+---
+// STEP 1: Add a prop to receive the site title
+export interface Props {
+  siteTitle: string;
+}
+const { siteTitle } = Astro.props;
+---
+<header id="reading-header" class="reading-header-outer">
+    <div class="reading-header-inner">
+        <a href={`/books/${Astro.params.slug}`} class="reading-header-link back-button" title="Back to Table of Contents">
+            ←
+        </a>
+
+        <!-- STEP 2: Create a container for our two dynamic titles -->
+        <div class="header-title-container">
+            <!-- The Site Title is shown by default -->
+            <a href="/" id="header-site-title" class="header-title site-title">{siteTitle}</a>
+            <!-- The Chapter Title is hidden by default and will be filled by JS -->
+            <div id="header-chapter-title" class="header-title chapter-title" ></div>
+        </div>
+        <div class="header-spacer"></div> <!-- Spacer to keep the title centered -->
+    </div>
+</header>
+
+<style>
+/* --- Outer container, already correct --- */
+.reading-header-outer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--theme-bg, #fff);
+    border-bottom: 1px solid var(--theme-border, #eee);
+    z-index: 1000;
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+/* ADD THIS: Add a subtle shadow when the user scrolls */
+.reading-header-outer.scrolled {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* --- Inner container, already correct --- */
+.reading-header-inner {
+    max-width: 800px; 
+    margin: 0 auto;
+    padding: 0 1rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+ .header-spacer {
+        flex-shrink: 0;
+        width: 44px; /* Approx width of the back button to keep title centered */
+        height: 44px;
+    }
+
+/* --- The container for our swapping titles --- */
+.header-title-container {
+    flex-grow: 1;
+    text-align: center;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Individual title styles --- */
+.header-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: absolute; /* Allows for smooth fading between the two */
+    transition: opacity 0.3s, transform 0.3s;
+    opacity: 1;
+    transform: translateY(0);
+}
+.site-title {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--theme-text, #333);
+}
+.chapter-title {
+    font-size: 0.9rem;
+    color: var(--theme-text-secondary, #666);
+}
+
+/* --- Logic for showing/hiding titles on scroll --- */
+/* By default, site title is visible, chapter title is hidden */
+.scrolled #header-site-title,
+#header-chapter-title {
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none; /* Can't click hidden elements */
+}
+/* When scrolled, the opposite happens */
+.scrolled #header-chapter-title {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.reading-header-link {
+    font-size: 1.25rem;
+    color: var(--theme-text, #333);
+    text-decoration: none;
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+}
+</style>

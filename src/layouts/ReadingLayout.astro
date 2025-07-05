@@ -1,0 +1,87 @@
+---
+// src/layouts/ReadingLayout.astro
+
+import ReadingHeader from '../components/ReadingHeader.astro';
+import ReadingFooter from '../components/ReadingFooter.astro';
+// STEP 1: Import the new Svelte components
+import ReadingExperience from '../components/ReadingExperience.svelte'; // This is our headless island
+import '../styles/global.css'; // Import global styles
+
+
+interface Props {
+	title: string;
+}
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>{title}</title>
+        
+        <!-- This script is still essential to prevent the "flash" of default styles -->
+        <script is:inline src="/scripts/settings-loader.js"></script>
+	</head>
+	<body>
+        
+        <!-- The header provides the button with id="settings-toggle" -->
+        <ReadingHeader siteTitle="Ancient Jade Statue's Library" />
+
+		<slot /> <!-- This is where the [chapterSlug].astro content will be injected -->
+
+        <!-- STEP 2: REMOVE the old, static HTML panel -->
+        <!-- The entire <div id="settings-panel">...</div> block is now GONE from here -->
+
+        <!-- The footer provides the button with id="bottom-settings-toggle" -->
+        <ReadingFooter />
+
+        <!-- STEP 3: ADD the new interactive Svelte components (Islands) -->
+        <ReadingExperience client:idle />
+
+        <!-- This minimal script handles global effects not owned by any single island -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const readingHeader = document.getElementById('reading-header');
+                const chapterTitleInHeader = document.getElementById('header-chapter-title');
+                
+                // Task 1: Save the initial state for "Continue Reading"
+                const initialChapterHeader = document.querySelector('.chapter-header h1');
+                if (initialChapterHeader) {
+                    localStorage.setItem('lastReadUrl', window.location.pathname);
+                    localStorage.setItem('lastReadTitle', initialChapterHeader.textContent ?? '');
+                }
+
+                // Task 2: Manage the header scroll effect
+                let isTicking = false;
+                function handleScroll() {
+                    if (!isTicking) {
+                        window.requestAnimationFrame(() => {
+                            if (readingHeader) {
+                                readingHeader.classList.toggle('scrolled', window.scrollY > 50);
+
+                                let currentChapterTitle = '';
+                                const chapterHeaders = document.querySelectorAll('.chapter-header');
+                                chapterHeaders.forEach(header => {
+                                    const rect = header.getBoundingClientRect();
+                                    if (rect.top < 100) { 
+                                        currentChapterTitle = header.querySelector('h1')?.textContent ?? '';
+                                    }
+                                });
+                                if (chapterTitleInHeader) {
+                                    chapterTitleInHeader.textContent = currentChapterTitle;
+                                }
+                            }
+                            isTicking = false;
+                        });
+                        isTicking = true;
+                    }
+                }
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                handleScroll();
+            });
+        </script>
+	</body>
+</html>

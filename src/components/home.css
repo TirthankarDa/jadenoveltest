@@ -1,0 +1,166 @@
+
+/* ============================================= */
+/* 1. DESIGN SYSTEM (Fixed Parameters)           */
+/* ============================================= */
+:root {
+    /* Base Font Size (for rem calculation, typically 16px) */
+    --font-size-base: 1rem;       /* 16px - Used for body text */
+
+    /* Typographic Scale (based on a consistent ratio) */
+    --font-size-sm:   0.875rem;    /* 14px - For metadata, captions */
+    --font-size-md:   1rem;        /* 16px - For standard paragraph text */
+    --font-size-lg:   1.125rem;    /* 18px - For subtitles, lead paragraphs */
+    --font-size-h3:   1.25rem;     /* 20px - For card titles, minor headings */
+    --font-size-h2:   1.75rem;     /* 28px - For section titles */
+    --font-size-h1:   2.25rem;     /* 36px - For the main hero title */
+
+    /* Line Heights */
+    --line-height-heading: 1.2;     /* Tighter for impactful headlines */
+    --line-height-body:    1.6;     /* Looser for readable body text */
+
+    /* Spacing System (8px Grid: 0.5rem = 8px) */
+    --space-1: 0.5rem;  /*  8px */
+    --space-2: 1rem;    /* 16px */
+    --space-3: 1.5rem;  /* 24px */
+    --space-4: 2rem;    /* 32px */
+    --space-5: 2.5rem;  /* 40px */
+    --space-6: 3rem;    /* 48px */
+}
+
+/* ============================================= */
+/* 2. STYLES (Applying the System)               */
+/* ============================================= */
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: var(--space-2) var(--space-2);
+}
+.img-author {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.title--hero {
+    font-size: var(--font-size-h1);
+    line-height: var(--line-height-heading);
+    margin: var(--space-3) 0 var(--space-1);
+    color: var(--color-text-primary);
+}
+.subtitle--hero {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-body);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* General Section Styling */
+.section {
+    padding: var(--space-6) var(--space-2);
+}
+.hero + .section {
+    padding-top: var(--space-1); /* Was var(--space-6), now 24px */
+}
+.title--section {
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-heading);
+    margin-bottom: var(--space-4);
+    text-align: center;
+    color: var(--color-text-primary);
+}
+
+/* Book Grid & Cards */
+.grid--books {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-4);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.book-card {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #fff;
+    background: #333;
+    aspect-ratio: 3/5;
+    transition: transform 0.3s;
+}
+.book-card:hover { transform: translateY(-4px); }
+.card__cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+.book-card:hover .card__cover { transform: scale(1.05); }
+.card__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-3); /* Consistent padding */
+    background: linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.7) 50%,transparent 100%);
+}
+.card__content h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--line-height-heading);
+    margin: 0 0 var(--space-1);
+    color: #fff;
+}
+.card__content p {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    margin: var(--space-1) 0;
+}
+.card__meta { /* New class for metadata */
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Coming Soon Card */
+.coming-soon {
+    background: var(--cc);
+    border: 2px dashed #555;
+    border-radius: 8px;
+    padding: var(--space-4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.coming-soon h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--line-height-heading);
+    margin: 0 0 var(--space-2);
+    color: #555;
+}
+.coming-soon__text {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    color: #777;
+    font-style: italic;
+}
+
+
+/* ============================================= */
+/* 3. RESPONSIVE ADJUSTMENTS                     */
+/* ============================================= */
+@media(max-width: 767px) {
+    .hero { padding: var(--space-4) var(--space-2); }
+    .section { padding: var(--space-5) var(--space-2); }
+    .grid--books { grid-template-columns: 1fr; }
+
+    /* Adjust heading sizes for smaller screens */
+    .title--hero { font-size: var(--font-size-h2); }
+    .title--section { font-size: 1.5rem; /* 24px - Or var(--font-size-h3) if preferred */ }
+}
